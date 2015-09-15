@@ -220,6 +220,8 @@ reverse(files.begin(),files.end());
     //Only now we have info about number of boards and set it to number of mechanisms
     NUM_MECH = USBBoards.activeAtStart;
 
+
+
     return USBBoards.activeAtStart;
 }
 

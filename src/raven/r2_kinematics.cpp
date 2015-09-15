@@ -407,7 +407,14 @@ int r2_inv_kin(struct device *d0, int runlevel)
 		theta2joint(iksol[sol_idx], Js);
 
 		//check joint limits for saturating
-		int limited = apply_joint_limits(Js,Js_sat);
+		int limited = 0;
+
+#ifdef KIST
+		if (d0->mech[m].type == GREEN_ARM)
+#endif
+		int a = 1;
+			//limited = apply_joint_limits(Js,Js_sat);
+
 
 		if (limited)
 		{
@@ -431,10 +438,18 @@ int r2_inv_kin(struct device *d0, int runlevel)
 		d0->mech[m].joint[SHOULDER].jpos_d = Js_sat[0];
 		d0->mech[m].joint[ELBOW   ].jpos_d = Js_sat[1];
 		d0->mech[m].joint[Z_INS   ].jpos_d = Js_sat[2];
+#ifdef KIST
+		d0->mech[m].joint[TOOL_ROT].jpos_d = 0;
+		d0->mech[m].joint[WRIST   ].jpos_d = 0;
+		d0->mech[m].joint[GRASP1  ].jpos_d = 0;
+		d0->mech[m].joint[GRASP2  ].jpos_d = 0;
+#else
 		d0->mech[m].joint[TOOL_ROT].jpos_d = Js_sat[3];
 		d0->mech[m].joint[WRIST   ].jpos_d = Js_sat[4];
 		d0->mech[m].joint[GRASP1  ].jpos_d = -Js[5] +  gangle / 2;
 		d0->mech[m].joint[GRASP2  ].jpos_d =  Js[5] +  gangle / 2;
+#endif
+
 
 		if (printIK !=0 )// && d0->mech[m].type == GREEN_ARM_SERIAL )
 		{
@@ -678,7 +693,7 @@ int apply_joint_limits(double *Js, double *Js_sat){
 	{
 		Js_sat[0] = DOF_types[SHOULDER].min_limit;
 		limited = 1;
-		std::cout<<"eblow min limit reached  = "<<Js_sat[0]<<std::endl;
+		std::cout<<" eblow min limit reached  = "<<Js_sat[0]<<std::endl;
 	}
 	else if(Js[0] >= DOF_types[SHOULDER].max_limit)
 	{
@@ -714,6 +729,7 @@ int apply_joint_limits(double *Js, double *Js_sat){
 		std::cout<<"z max limit reached  = "<<Js_sat[2]<<std::endl;
 	}
 
+#ifndef KIST
 	if (Js[3] <= -150.0 DEG2RAD)
 	{
 		Js_sat[3] = -150.0 DEG2RAD;
@@ -741,19 +757,19 @@ int apply_joint_limits(double *Js, double *Js_sat){
 		limited = 1;
 		std::cout<<"wrist max limit reached  = "<<Js_sat[4]<<std::endl;
 	}
-
+#endif
 	//todo add more saturation for graspers
 
 	//Js_sat[5] = Js[5];
-	/*
+
 	Js_sat[0] = Js[0];
 	Js_sat[1] = Js[1];
 	Js_sat[2] = Js[2];
 	Js_sat[3] = Js[3];
 	Js_sat[4] = Js[4];
-	Js_sat[5] = Js[5];*/
+	Js_sat[5] = Js[5];
 
-	//if (limited) std::cout<<"A joint has been saturated"<<std::endl;
+	if (limited) std::cout<<"A joint has been saturated"<<std::endl;
 
 	return limited;
 }
@@ -925,13 +941,19 @@ void joint2theta(double *out_iktheta, double *in_J, l_r in_arm)
 		out_iktheta[0] = in_J[0] + TH1_J0_L * d2r;
 		out_iktheta[1] = in_J[1] + TH2_J1_L * d2r;
 		out_iktheta[2] = in_J[2] + D3_J2_L;
+#ifdef KIST
+		out_iktheta[3] = 0;
+		out_iktheta[4] = 0;
+		out_iktheta[5] = 0;
+#else
 		out_iktheta[3] = in_J[3] + TH4_J3_L * d2r;
 		out_iktheta[4] = in_J[4] + TH5_J4_L * d2r;
 		out_iktheta[5] = in_J[5] + TH6A_J5_L * d2r;
+#endif
+
 
 		static int larm_check = 0;
 		if (larm_check < 2) {
-			log_msg("why left arm? -- j2t");
 			larm_check++;
 		}
 
@@ -946,9 +968,9 @@ void joint2theta(double *out_iktheta, double *in_J, l_r in_arm)
 		out_iktheta[3] = in_J[3] + TH4_J3_R * d2r;
 		out_iktheta[4] = in_J[4] + TH5_J4_R * d2r;
 		out_iktheta[5] = in_J[5] + TH6A_J5_R * d2r;
+
 		static int arm_check = 0;
 		if (arm_check < 2) {
-			log_msg("definitely still the right arm j2t");
 			arm_check++;
 		}
 	}

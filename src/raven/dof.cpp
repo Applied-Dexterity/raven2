@@ -18,7 +18,8 @@
  */
 
 /*
- * dof.c - functions that fill in the DOF structure
+ *  NOT CURRENTLY USED for mpos - state estimate is used instead
+ *     Processes encoder values to motor positions
  *     processEncVal - process an encoder value from a USB packet
  *     encToJPos - go from an encoder value to a Joint position
  *
@@ -71,11 +72,40 @@ void encToMPos(struct DOF *joint)
 {
   //MPos is just the motor angle
   joint->mpos = encToMPos2(joint);
+
+}
+
+/**
+ * encToJPos - converts a joint encoder count to joint position. This function sets the mpos parameter of the joint structure
+ *
+ * \param joint pointer to degree of freedom to work on
+ *
+ */
+void encToJPos(struct DOF *joint)
+{
+  int normEncJ = joint->enc_val_joint - joint->enc_offset_joint;
+  float joint_offset = 0;
+  float enc_res = J_ENC_CNT_PER_REV; //default to safe value
+
+  //joint offsets are explained at the end of the Kinematics White Paper
+  //if (joint->type == SHOULDER)
+  //  joint_offset = -25 DEG2RAD; //counts per radian
+
+
+  if ((joint->type % 8 == 0) || (joint->type % 8 ==  1)){
+	  enc_res = (float)J_ENC_CNT_PER_REV / 360; //counts per radian
+
+  }
+  else if (joint->type % 8 == 2)
+	  enc_res = -1 * L_ENC_CNT_PER_M;
+
+  joint->jpos_joint = (float)normEncJ / enc_res ;//+ joint_offset;
+
 }
 
 
 /**
-* Similar returns an angle corresponding to encoder value contained in joint parameter. Function normalizes values so that they are returned measured from start position
+* Returns an angle corresponding to encoder value contained in joint parameter. Function normalizes values so that they are returned measured from start position
 *  \param joint Pointer to structure containing joint info
 *  \return angle of the encoder
 */
@@ -84,21 +114,24 @@ float encToMPos2(struct DOF *joint)
   float motorAngle;
   int normEnc;
 
+  //find the joint angle according to the joint encoder
+
+
   //Adjust encoder value - based on start position
   normEnc =  normalizeEncCnt(joint);
 
   //Determine motor angle
   motorAngle = (2*PI) * (1/((float)ENC_CNTS_PER_REV)) * normEnc;
 
+
   //MPos is just the motor angle
   return motorAngle;
 }
 
 /**
- * normalizeEncCnt - adjusts encVal based on middle pos.
+ * normalizeEncCnt - adjusts encVal based on end pos.
  *
- * \param encVal the encoder value
- * \param dof the degree of freedom
+ * \param dof the DOF structure being calculated
  *
  * \return normalized encoder value
  */

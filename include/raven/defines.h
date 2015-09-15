@@ -34,23 +34,20 @@
 
 #define SURGICAL_ROBOT     	1
 #define RAVEN_II        	1
-//#define KIST
+#define KIST
+
+
 
 //#define RAVEN_TOOLS
-#define DV_ADAPTER			1
+//#define DV_ADAPTER			1
 //#define RAVEN_II_SQUARE    1 //for Santa Cruz style tool carriage
-//#define RICKS_TOOLS
-
-#undef RAVEN_TOOLS
-//#undef DV_ADAPTER
-#undef RAVEN_II_SQUARE
-#undef RICKS_TOOLS
+#define RICKS_TOOLS
 
 
 // Two arm identification
 // Change this to match device ID in /dev/brl_usbXX
-#define GREEN_ARM_SERIAL 37
-#define GOLD_ARM_SERIAL  29
+#define GREEN_ARM_SERIAL 23 // KIST only has a GREEN ARM
+#define GOLD_ARM_SERIAL  99 // DO NOT CHANGE
 
 #define GREEN_ARM        GREEN_ARM_SERIAL
 #define GOLD_ARM         GOLD_ARM_SERIAL
@@ -58,18 +55,13 @@
 
 
 //KIST configuration is GREEN ONLY and no tools(ricks tools)
+//developed for standard RAVEN arm Autumn 2014
 #ifdef KIST
 
 #ifndef GREEN_ONLY
 #define GREEN_ONLY //if only using the green arm and one USB board
 #endif
 
-#undef RAVEN_TOOLS
-#undef DV_ADAPTER
-#undef RAVEN_II_SQUARE
-
-
-#define RICKS_TOOLS
 
 #endif
 
@@ -90,6 +82,15 @@
 
 #define ENC_CNT_PER_DEG (float)(ENC_CNTS_PER_REV / 360)
 #define ENC_CNT_PER_RAD (float)(ENC_CNTS_PER_REV / (2*M_PI))
+
+
+#define J_ENC_CNT_PER_REV 4096*4
+
+#define J_ENC_CNT_PER_DEG (float)(J_ENC_CNTS_PER_REV / 360)
+#define J_ENC_CNT_PER_RAD (float)(J_ENC_CNTS_PER_REV / (2*M_PI))
+
+#define L_ENC_CNT_PER_M (float)200000 // 5um per count
+
 
 //Verbose mode
 //#define MORE_MESSAGES 1
@@ -227,6 +228,18 @@
 
 //InvKinematic Software Stops
 //   Kinematics equations for R+II are formulated so that joint ranges are identical on each arm.
+//   KIST has different joint stops
+#ifdef KIST
+#define SHOULDER_MIN_LIMIT (float)(   0.0 DEG2RAD)
+#define SHOULDER_MAX_LIMIT (float)(  110.0 DEG2RAD)
+#define ELBOW_MIN_LIMIT (float)(  50.0 DEG2RAD)
+#define ELBOW_MAX_LIMIT (float)( 185.0 DEG2RAD)
+
+#define Z_INS_MIN_LIMIT (float) 0.18 //meters (-0.230)
+#define Z_INS_MAX_LIMIT (float) 0.47 //meters ( 0.010)
+
+#else
+
 #define SHOULDER_MIN_LIMIT (float)(   0.0 DEG2RAD)
 #define SHOULDER_MAX_LIMIT (float)(  90.0 DEG2RAD)
 #define ELBOW_MIN_LIMIT (float)(  45.0 DEG2RAD)
@@ -234,6 +247,7 @@
 
 #define Z_INS_MIN_LIMIT (float) 0.23 //meters (-0.230)
 #define Z_INS_MAX_LIMIT (float) 0.56 //meters ( 0.010)
+#endif
 
 /*#define TOOL_GRASP1_MIN_LIMIT (float)(-45.0 DEG2RAD)
 #define TOOL_GRASP1_MAX_LIMIT (float)( 45.0 DEG2RAD)
@@ -272,11 +286,24 @@
 
 #endif
 
+#ifdef KIST
+#define SHOULDER_MAX_ANGLE   0.0
+#define ELBOW_MAX_ANGLE      187 DEG2RAD
+#define Z_INS_MAX_ANGLE      .47
 
+#define SHOULDER_HOME_ANGLE   55 DEG2RAD
+#define ELBOW_HOME_ANGLE      117 DEG2RAD
+#define Z_INS_HOME_ANGLE      0.325
+
+#define TOOL_ROT_HOME_ANGLE   0
+#define WRIST_HOME_ANGLE      0
+#define GRASP1_HOME_ANGLE     0
+#define GRASP2_HOME_ANGLE     0
+
+#else
 #define SHOULDER_MAX_ANGLE   0.0
 #define ELBOW_MAX_ANGLE      3*M_PI/4 + (2.5*M_PI/180)
 #define Z_INS_MAX_ANGLE      0.562
-
 
 #define SHOULDER_HOME_ANGLE   M_PI/6
 #define ELBOW_HOME_ANGLE      M_PI/2
@@ -286,6 +313,7 @@
 #define GRASP1_HOME_ANGLE     M_PI/4
 #define GRASP2_HOME_ANGLE     M_PI/4
 
+#endif
 
 #define MICRON_PER_M      1000000.0
 #define MICRORADS_PER_RAD 1000000.0

@@ -55,7 +55,7 @@ void stateEstimate(struct robot_device *device0)
 //                encToMPos(_joint);
 //            else
                 getStateLPF(_joint, device0->mech[i].tool_type);
-
+                encToJPos(_joint);
         }
     }
 }

@@ -145,12 +145,19 @@ void fwdMechCableCoupling(struct mechanism *mech)
 	// Now have solved for th1, th2, d3, th4, th5, th6
 	mech->joint[SHOULDER].jpos 		= th1;// - mech->joint[SHOULDER].jpos_off;
 	mech->joint[ELBOW].jpos 		= th2;// - mech->joint[ELBOW].jpos_off;
-	mech->joint[TOOL_ROT].jpos 		= th3;// - mech->joint[TOOL_ROT].jpos_off;
 	mech->joint[Z_INS].jpos 		= d4;//  - mech->joint[Z_INS].jpos_off;
+
+#ifdef KIST
+	mech->joint[TOOL_ROT].jpos 		= 0;// - mech->joint[TOOL_ROT].jpos_off;
+	mech->joint[WRIST].jpos 		= 0;// - mech->joint[WRIST].jpos_off;
+	mech->joint[GRASP1].jpos 		= 0;// - mech->joint[GRASP1].jpos_off;
+	mech->joint[GRASP2].jpos 		= 0;// - mech->joint[GRASP2].jpos_off;
+#else
+	mech->joint[TOOL_ROT].jpos 		= th3;// - mech->joint[TOOL_ROT].jpos_off;
 	mech->joint[WRIST].jpos 		= th5;// - mech->joint[WRIST].jpos_off;
 	mech->joint[GRASP1].jpos 		= th6;// - mech->joint[GRASP1].jpos_off;
 	mech->joint[GRASP2].jpos 		= th7;// - mech->joint[GRASP2].jpos_off;
-
+#endif
 	mech->joint[SHOULDER].jvel 		= th1_dot;// - mech->joint[SHOULDER].jpos_off;
 	mech->joint[ELBOW].jvel 		= th2_dot;// - mech->joint[ELBOW].jpos_off;
 	mech->joint[Z_INS].jvel 		= d4_dot;//  - mech->joint[Z_INS].jpos_off;

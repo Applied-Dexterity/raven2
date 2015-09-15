@@ -159,9 +159,9 @@ void *console_process(void *)
             }
         }
 
-        // Output the robot state once/sec
+        // Output the robot state every .75 seconds
         if ( output_robot        &&
-             (t1.now()-t1).toSec() > 1 )
+             (t1.now()-t1).toSec() > .75 )
         {
             outputRobotState();
             t1=t1.now();
@@ -216,7 +216,11 @@ int getkey() {
  */
 void outputRobotState(){
     cout<<"Runevel: "<< static_cast<unsigned short int>(device0.runlevel)<<"\n";
+#ifdef GREEN_ONLY
+    for (int j = 0; j < 1; j++)
+#else
     for (int j = 0; j < 2; j++)
+#endif
     {
         if (device0.mech[j].type == GOLD_ARM)
             cout << "Gold arm:\t";
@@ -259,6 +263,16 @@ void outputRobotState(){
             cout<<device0.mech[j].joint[i].enc_offset<<"\t";
         cout<<"\n";
 
+        cout<<"enc_val_joint:\t";
+        for (int i=0;i<MAX_DOF_PER_MECH;i++)
+            cout<<device0.mech[j].joint[i].enc_val_joint<<"\t";
+        cout<<"\n";
+
+        cout<<"enc_off_joint:\t";
+        for (int i=0;i<MAX_DOF_PER_MECH;i++)
+            cout<<device0.mech[j].joint[i].enc_offset_joint<<"\t";
+        cout<<"\n";
+
         cout<<"mpos:\t\t";
         for (int i=0;i<MAX_DOF_PER_MECH;i++)
             cout<<fixed<<setprecision(2)<<device0.mech[j].joint[i].mpos <<"\t";
@@ -285,6 +299,22 @@ void outputRobotState(){
                 cout<<fixed<<setprecision(3)<<device0.mech[j].joint[i].jpos <<"\t";
             else
                 cout<<fixed<<setprecision(3)<<device0.mech[j].joint[i].jpos<<"\t";
+        cout<<"\n";
+
+        cout<<"jpos_joint:\t";
+        for (int i=0;i<MAX_DOF_PER_MECH;i++)
+            if (i!=2)
+                cout<<fixed<<setprecision(3)<<device0.mech[j].joint[i].jpos_joint <<"\t";
+            else
+                cout<<fixed<<setprecision(3)<<device0.mech[j].joint[i].jpos_joint<<"\t";
+        cout<<"\n";
+
+        cout<<"jpos_diff:\t";
+        for (int i=0;i<MAX_DOF_PER_MECH;i++)
+            if (i!=2)
+                cout<<fixed<<setprecision(3)<<device0.mech[j].joint[i].jpos-device0.mech[j].joint[i].jpos_joint <<"\t";
+            else
+            	cout<<fixed<<setprecision(3)<<device0.mech[j].joint[i].jpos-device0.mech[j].joint[i].jpos_joint <<"\t";
         cout<<"\n";
 
         cout<<"jpos_d:\t\t";

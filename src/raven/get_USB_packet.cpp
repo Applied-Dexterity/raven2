@@ -161,4 +161,15 @@ void processEncoderPacket(struct mechanism* mech, unsigned char buffer[])
         encVal = processEncVal(buffer, i);
         mech->joint[i].enc_val = encVal;
     }
+
+#ifdef KIST
+    //copy the last 3 encoder values as joint enc values for the first three
+    //set those to zero, since they're not motor encoders
+    for (i = 0; i < 3; i++)
+    {
+    	mech->joint[i].enc_val_joint = mech->joint[i+5].enc_val;
+    	mech->joint[i+5].enc_val = 0;
+    }
+    mech->joint[4].enc_val = 0; //roll encoder floats (electrically), set to zero
+#endif
 }

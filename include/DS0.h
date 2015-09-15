@@ -98,8 +98,10 @@ struct DOF {
   u_16 type;
   jointState state;            // is this DoF enabled?
   s_24 enc_val;		// encoder value
+  s_24 enc_val_joint;
   s_16 current_cmd;	// DAC command to achieve tau at actuator
   float jpos;		// actual DOF coordinate (rad)
+  float jpos_joint; // joint coordinate according to joint encoder
   float mpos;
   //  float jpos_old;       // previous DOF coordinate (rad)
   //  float mpos_old;
@@ -115,6 +117,7 @@ struct DOF {
   float jvel_d;		// desired DOF velocity (q-dot-desired)
   float mvel_d;
   int enc_offset;       // Encoder offset to "zero"
+  int enc_offset_joint;
   float perror_int;     // integrated position error for joint space position control
 };
 

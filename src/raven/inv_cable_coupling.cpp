@@ -104,14 +104,6 @@ void invMechCableCoupling(struct mechanism *mech, int no_use_actual)
 	tr6 = DOF_types[GRASP1_GREEN   ].TR;
 	tr7 = DOF_types[GRASP2_GREEN   ].TR;
 
-	static int thrice = 0;
-	if (thrice < 4)
-	{
-		log_msg("mech type --> %i ", mech->type);
-		log_msg("GREEN ARM --> %i ", GREEN_ARM);
-		thrice++;
-	}
-
   }
 
 
@@ -200,11 +192,19 @@ void invMechCableCoupling(struct mechanism *mech, int no_use_actual)
   /*Now have solved for desired motor positions mpos_d*/
   mech->joint[SHOULDER].mpos_d 	= m1;
   mech->joint[ELBOW].mpos_d 	= m2;
-  mech->joint[TOOL_ROT].mpos_d 	= m3;
   mech->joint[Z_INS].mpos_d 	= m4;
+#ifdef KIST
+  mech->joint[TOOL_ROT].mpos_d 	= 0;
+  mech->joint[WRIST].mpos_d 	= 0;
+  mech->joint[GRASP1].mpos_d 	= 0;
+  mech->joint[GRASP2].mpos_d 	= 0;
+#else
+  mech->joint[TOOL_ROT].mpos_d 	= m3;
   mech->joint[WRIST].mpos_d 	= m5;
   mech->joint[GRASP1].mpos_d 	= m6;
   mech->joint[GRASP2].mpos_d 	= m7;
+#endif
+
 
   return;
 }

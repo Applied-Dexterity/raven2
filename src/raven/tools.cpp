@@ -334,7 +334,11 @@ void tool::set_wrist_coupling() {
 void tool::set_DH_params() {
 	switch (t_end) {
 	case r_grasper:
+#ifdef KIST
+		shaft_length = 1;
+#else
 		shaft_length = 0.482;
+#endif
 		wrist_length = 0.013;
 		break;
 

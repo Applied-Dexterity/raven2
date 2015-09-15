@@ -231,12 +231,14 @@ int set_joints_known_pos(struct mechanism* _mech, int tool_only)
         {
             // Set jpos_d to the joint limit value.
             _joint->jpos_d = DOF_types[ _joint->type ].home_position;  // keep non tool joints from moving
+
         }
 
-        // when positioning joints finish, set tool joints to nothing special
+        // when positioning joints finish, set tool joints to their current value
         else if (!tool_only && is_toolDOF(_joint->type) )
         {
             _joint->jpos_d = _joint->jpos;
+
 		}
 		// when tool or positioning joints finish, set them to max_angle
 		else {
@@ -248,6 +250,7 @@ int set_joints_known_pos(struct mechanism* _mech, int tool_only)
 			}
 			else
 				_joint->jpos_d = DOF_types[_joint->type].max_position;
+
 
 			// Initialize a trajectory to operating angle
 			_joint->state = jstate_homing1;
@@ -267,6 +270,10 @@ int set_joints_known_pos(struct mechanism* _mech, int tool_only)
         // Convert the motor position to an encoder offset.
         // mpos = k * (enc_val - enc_offset)  --->  enc_offset = enc_val - mpos/k
         float f_enc_val = _joint->enc_val;
+
+        // Convert the joint position to a joint encoder offset.
+        // jpos = (enc_val - enc_offset)  --->  enc_offset_joint = enc_val_joint - jpos(0)
+        float f_enc_val_joint = _joint->enc_val_joint;
 
         // Encoder values on Gold arm are reversed.  See also state_machine.cpp
     switch (_mech->mech_tool.t_style){
@@ -293,7 +300,11 @@ int set_joints_known_pos(struct mechanism* _mech, int tool_only)
 
         /// Set the joint offset in encoder space.
         float cc = ENC_CNTS_PER_REV / (2*M_PI);
+#ifdef KIST
+        if (!is_toolDOF(_joint))
+#endif
         _joint->enc_offset = f_enc_val - (_joint->mpos_d * cc);
+        _joint->enc_offset_joint = f_enc_val_joint;
 
 
         getStateLPF(_joint, _mech->tool_type);
@@ -490,9 +501,9 @@ const int homing_max_dac[8] = {2500,  //shoulder
                             1700,  //grasp1
                             1700};  // grasp2
 #else
-const int homing_max_dac[8] = {2500,  //shoulder
-                            2500,  //elbow
-                            2600, //1900,  //z_ins
+const int homing_max_dac[8] = {2200,  //shoulder
+                            1400,  //elbow
+                            1000, //1900,  //z_ins
                             0,
                             1900,  //tool_rot  //rasised from 1400 alewis 3/4/14
                             1900,  //wrist

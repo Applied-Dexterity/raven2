@@ -63,6 +63,7 @@ struct DOF_type {
 
 	// encoder counts per revolution
 	int enc_cnts;
+	int joint_enc_counts;
 
 	int DAC_max;
 
